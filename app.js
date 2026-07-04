@@ -1254,20 +1254,31 @@ import * as THREE from 'https://esm.sh/three';
       else general++;
     });
 
-    document.getElementById('stat-danger').textContent = danger;
-    document.getElementById('stat-warning').textContent = warning;
-    document.getElementById('stat-info').textContent = general;
+    const dangerEl = document.getElementById('stat-danger');
+    const warningEl = document.getElementById('stat-warning');
+    const infoEl = document.getElementById('stat-info');
+
+    if (dangerEl) dangerEl.textContent = danger;
+    if (warningEl) warningEl.textContent = warning;
+    if (infoEl) infoEl.textContent = general;
   }
 
   function populateHotspotsFeed() {
     const feedContainer = document.getElementById('alerts-feed');
-    feedContainer.innerHTML = '';
 
     // Filter based on active overview filter
     const filtered = state.hotspots.filter(h => {
       if (state.currentFilter === 'all') return true;
       return h.type === state.currentFilter;
     });
+
+    // Populate bottom scrolling ticker text with breaking alerts (always do this)
+    populateTicker(filtered);
+
+    // If feed container element does not exist in HUD layout, exit gracefully
+    if (!feedContainer) return;
+
+    feedContainer.innerHTML = '';
 
     if (filtered.length === 0) {
       feedContainer.innerHTML = `
@@ -1306,9 +1317,6 @@ import * as THREE from 'https://esm.sh/three';
 
       feedContainer.appendChild(item);
     });
-
-    // Populate bottom scrolling ticker text with breaking alerts
-    populateTicker(filtered);
   }
 
   function populateTicker(hotspotList) {
