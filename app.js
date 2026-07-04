@@ -549,9 +549,30 @@ import * as THREE from 'https://esm.sh/three';
 
   // --- SYSTEM TIME ---
   function updateTime() {
-    const timeEl = document.getElementById('system-time');
+    const timeEl = document.getElementById('hud-gmt-time');
+    const dateEl = document.getElementById('hud-gmt-date');
+    if (!timeEl || !dateEl) return;
+    
     const now = new Date();
-    timeEl.textContent = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+    
+    // Format time as GMT: HH:MM:SS
+    const hours = String(now.getUTCHours()).padStart(2, '0');
+    const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+    timeEl.textContent = `GMT: ${hours}:${minutes}:${seconds}`;
+    
+    // Format date as DATE: DD MMM YYYY
+    const day = String(now.getUTCDate()).padStart(2, '0');
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const month = months[now.getUTCMonth()];
+    const year = now.getUTCFullYear();
+    dateEl.textContent = `DATE: ${day} ${month} ${year}`;
+
+    // Update Left Events Subpanel
+    const serverTimeEl = document.getElementById('info-server-time');
+    const tempTimeEl = document.getElementById('info-temp-time');
+    if (serverTimeEl) serverTimeEl.textContent = `${hours}:${minutes} UTC`;
+    if (tempTimeEl) tempTimeEl.textContent = `${hours}:${minutes} UTC`;
   }
   setInterval(updateTime, 1000);
   updateTime();
@@ -1019,21 +1040,52 @@ import * as THREE from 'https://esm.sh/three';
       card.href = link;
       card.target = '_blank';
       card.rel = 'noopener noreferrer';
-      card.className = `news-card card-${severity}`;
+      card.className = `cyber-feed-card cyber-card-${severity}`;
       
-      // Determine badge markup
-      const severityBadge = severity === 'danger' ? 'danger' : (severity === 'warning' ? 'warning' : 'general');
-      const severityLabel = severity.toUpperCase();
+      const badgeText = severity === 'danger' ? 'RED' : (severity === 'warning' ? 'ORANGE' : 'BLUE');
+      
+      let svgGraphic = '';
+      if (severity === 'danger') {
+        svgGraphic = `
+          <svg class="threat-svg-icon" viewBox="0 0 50 50">
+            <rect x="5" y="5" width="40" height="40" fill="none" stroke="rgba(255, 71, 87, 0.15)" stroke-width="1" />
+            <path d="M 25,12 L 38,36 L 12,36 Z" fill="none" stroke="#ff4757" stroke-width="2" />
+            <line x1="25" y1="20" x2="25" y2="28" stroke="#ff4757" stroke-width="2" />
+            <circle cx="25" cy="32" r="1.5" fill="#ff4757" />
+          </svg>
+        `;
+      } else if (severity === 'warning') {
+        svgGraphic = `
+          <svg class="threat-svg-icon" viewBox="0 0 50 50">
+            <rect x="5" y="5" width="40" height="40" fill="none" stroke="rgba(255, 165, 2, 0.15)" stroke-width="1" />
+            <circle cx="25" cy="25" r="13" fill="none" stroke="#ffa502" stroke-width="1.5" stroke-dasharray="2,2" />
+            <circle cx="25" cy="25" r="7" fill="none" stroke="#ffa502" stroke-width="1.5" />
+            <line x1="25" y1="5" x2="25" y2="45" stroke="rgba(255, 165, 2, 0.25)" stroke-width="1" />
+            <line x1="5" y1="25" x2="45" y2="25" stroke="rgba(255, 165, 2, 0.25)" stroke-width="1" />
+          </svg>
+        `;
+      } else {
+        svgGraphic = `
+          <svg class="threat-svg-icon" viewBox="0 0 50 50">
+            <rect x="5" y="5" width="40" height="40" fill="none" stroke="rgba(84, 160, 255, 0.15)" stroke-width="1" />
+            <path d="M 10,25 Q 17.5,15 25,25 T 40,25" fill="none" stroke="#54a0ff" stroke-width="1.5" />
+            <path d="M 10,30 Q 17.5,20 25,30 T 40,30" fill="none" stroke="#54a0ff" stroke-width="0.8" opacity="0.4" />
+            <path d="M 10,20 Q 17.5,10 25,20 T 40,20" fill="none" stroke="#54a0ff" stroke-width="0.8" opacity="0.4" />
+          </svg>
+        `;
+      }
 
       card.innerHTML = `
-        <div class="card-tag-row">
-          <span class="threat-tag ${severityBadge}-tag">${severityLabel}</span>
-          <span class="news-date">${formattedDate}</span>
+        <div class="threat-details">
+          <div class="threat-lvl-header">${badgeText}</div>
+          <div class="threat-text-title">${title.toUpperCase()}</div>
+          <div class="threat-location-row">
+            <span class="threat-loc-name">${source.toUpperCase()}</span>
+            <span class="threat-time">${formattedDate}</span>
+          </div>
         </div>
-        <h4 class="news-title">${title}</h4>
-        <div class="news-source-meta">
-          <i data-lucide="external-link"></i>
-          <span>${source}</span>
+        <div class="card-graphics">
+          ${svgGraphic}
         </div>
       `;
 
@@ -1090,19 +1142,52 @@ import * as THREE from 'https://esm.sh/three';
       card.href = `https://www.google.com/search?q=${encodeURIComponent(m.title)}`;
       card.target = '_blank';
       card.rel = 'noopener noreferrer';
-      card.className = `news-card card-${m.severity}`;
+      card.className = `cyber-feed-card cyber-card-${m.severity}`;
       
-      const badge = m.severity === 'danger' ? 'danger' : (m.severity === 'warning' ? 'warning' : 'general');
+      const badgeText = m.severity === 'danger' ? 'RED' : (m.severity === 'warning' ? 'ORANGE' : 'BLUE');
+
+      let svgGraphic = '';
+      if (m.severity === 'danger') {
+        svgGraphic = `
+          <svg class="threat-svg-icon" viewBox="0 0 50 50">
+            <rect x="5" y="5" width="40" height="40" fill="none" stroke="rgba(255, 71, 87, 0.15)" stroke-width="1" />
+            <path d="M 25,12 L 38,36 L 12,36 Z" fill="none" stroke="#ff4757" stroke-width="2" />
+            <line x1="25" y1="20" x2="25" y2="28" stroke="#ff4757" stroke-width="2" />
+            <circle cx="25" cy="32" r="1.5" fill="#ff4757" />
+          </svg>
+        `;
+      } else if (m.severity === 'warning') {
+        svgGraphic = `
+          <svg class="threat-svg-icon" viewBox="0 0 50 50">
+            <rect x="5" y="5" width="40" height="40" fill="none" stroke="rgba(255, 165, 2, 0.15)" stroke-width="1" />
+            <circle cx="25" cy="25" r="13" fill="none" stroke="#ffa502" stroke-width="1.5" stroke-dasharray="2,2" />
+            <circle cx="25" cy="25" r="7" fill="none" stroke="#ffa502" stroke-width="1.5" />
+            <line x1="25" y1="5" x2="25" y2="45" stroke="rgba(255, 165, 2, 0.25)" stroke-width="1" />
+            <line x1="5" y1="25" x2="45" y2="25" stroke="rgba(255, 165, 2, 0.25)" stroke-width="1" />
+          </svg>
+        `;
+      } else {
+        svgGraphic = `
+          <svg class="threat-svg-icon" viewBox="0 0 50 50">
+            <rect x="5" y="5" width="40" height="40" fill="none" stroke="rgba(84, 160, 255, 0.15)" stroke-width="1" />
+            <path d="M 10,25 Q 17.5,15 25,25 T 40,25" fill="none" stroke="#54a0ff" stroke-width="1.5" />
+            <path d="M 10,30 Q 17.5,20 25,30 T 40,30" fill="none" stroke="#54a0ff" stroke-width="0.8" opacity="0.4" />
+            <path d="M 10,20 Q 17.5,10 25,20 T 40,20" fill="none" stroke="#54a0ff" stroke-width="0.8" opacity="0.4" />
+          </svg>
+        `;
+      }
 
       card.innerHTML = `
-        <div class="card-tag-row">
-          <span class="threat-tag ${badge}-tag">${m.severity.toUpperCase()} (SIMULATED)</span>
-          <span class="news-date">JUST NOW</span>
+        <div class="threat-details">
+          <div class="threat-lvl-header">${badgeText} (SIMULATED)</div>
+          <div class="threat-text-title">${m.title.toUpperCase()}</div>
+          <div class="threat-location-row">
+            <span class="threat-loc-name">${m.source.toUpperCase()}</span>
+            <span class="threat-time">JUST NOW</span>
+          </div>
         </div>
-        <h4 class="news-title">${m.title}</h4>
-        <div class="news-source-meta">
-          <i data-lucide="external-link"></i>
-          <span>${m.source}</span>
+        <div class="card-graphics">
+          ${svgGraphic}
         </div>
       `;
 
@@ -1329,10 +1414,10 @@ import * as THREE from 'https://esm.sh/three';
 
     if (state.isSpinning) {
       btn.classList.add('active');
-      btn.innerHTML = `<i data-lucide="refresh-cw" class="animate-spin"></i> Spin On`;
+      btn.innerHTML = `<i data-lucide="refresh-cw" class="animate-spin"></i> Auto Rotate`;
     } else {
       btn.classList.remove('active');
-      btn.innerHTML = `<i data-lucide="refresh-cw"></i> Spin Off`;
+      btn.innerHTML = `<i data-lucide="refresh-cw"></i> Auto Rotate`;
     }
     lucide.createIcons();
   }
@@ -1343,11 +1428,11 @@ import * as THREE from 'https://esm.sh/three';
 
     if (state.audioEnabled) {
       btn.classList.add('active');
-      btn.innerHTML = `<i data-lucide="volume-2"></i> Audio On`;
+      btn.innerHTML = `<i data-lucide="volume-2"></i> Audio Active`;
       playSound('ambient');
     } else {
       btn.classList.remove('active');
-      btn.innerHTML = `<i data-lucide="volume-x"></i> Audio Off`;
+      btn.innerHTML = `<i data-lucide="volume-x"></i> Audio Mute`;
       pauseAmbient();
     }
     lucide.createIcons();
@@ -1368,7 +1453,7 @@ import * as THREE from 'https://esm.sh/three';
 
     if (state.activeTheme === 'satellite') {
       state.globe.globeImageUrl('//cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg');
-      state.globe.atmosphereColor('#85a5ff');
+      state.globe.atmosphereColor('#4d9cff');
       btn.innerHTML = `<i data-lucide="layers"></i> Satellite Map`;
     } else if (state.activeTheme === 'terrain') {
       state.globe.globeImageUrl('//cdn.jsdelivr.net/npm/three-globe/example/img/earth-day.jpg');
@@ -1411,7 +1496,81 @@ import * as THREE from 'https://esm.sh/three';
   }
 
   function handleGlobeClick(lat, lng) {
+    const detailsBox = document.getElementById('point-details-box');
+    if (detailsBox) detailsBox.classList.remove('hidden');
     flyToLocation(lat, lng, 'Custom Vector Coordinates');
+  }
+
+  // Render pre-populated global feed matching screenshot when no point is selected
+  function renderGlobalThreatFeed() {
+    const listContainer = document.getElementById('news-list');
+    listContainer.innerHTML = '';
+    showNewsLoader(false);
+
+    state.hotspots.forEach(h => {
+      const card = document.createElement('a');
+      card.href = '#';
+      card.className = `cyber-feed-card cyber-card-${h.type}`;
+      
+      const badgeText = h.type === 'danger' ? 'RED' : (h.type === 'warning' ? 'ORANGE' : 'BLUE');
+
+      let svgGraphic = '';
+      if (h.type === 'danger') {
+        svgGraphic = `
+          <svg class="threat-svg-icon" viewBox="0 0 50 50">
+            <rect x="5" y="5" width="40" height="40" fill="none" stroke="rgba(255, 71, 87, 0.15)" stroke-width="1" />
+            <path d="M 25,12 L 38,36 L 12,36 Z" fill="none" stroke="#ff4757" stroke-width="2" />
+            <line x1="25" y1="20" x2="25" y2="28" stroke="#ff4757" stroke-width="2" />
+            <circle cx="25" cy="32" r="1.5" fill="#ff4757" />
+          </svg>
+        `;
+      } else if (h.type === 'warning') {
+        svgGraphic = `
+          <svg class="threat-svg-icon" viewBox="0 0 50 50">
+            <rect x="5" y="5" width="40" height="40" fill="none" stroke="rgba(255, 165, 2, 0.15)" stroke-width="1" />
+            <circle cx="25" cy="25" r="13" fill="none" stroke="#ffa502" stroke-width="1.5" stroke-dasharray="2,2" />
+            <circle cx="25" cy="25" r="7" fill="none" stroke="#ffa502" stroke-width="1.5" />
+            <line x1="25" y1="5" x2="25" y2="45" stroke="rgba(255, 165, 2, 0.25)" stroke-width="1" />
+            <line x1="5" y1="25" x2="45" y2="25" stroke="rgba(255, 165, 2, 0.25)" stroke-width="1" />
+          </svg>
+        `;
+      } else {
+        svgGraphic = `
+          <svg class="threat-svg-icon" viewBox="0 0 50 50">
+            <rect x="5" y="5" width="40" height="40" fill="none" stroke="rgba(84, 160, 255, 0.15)" stroke-width="1" />
+            <path d="M 10,25 Q 17.5,15 25,25 T 40,25" fill="none" stroke="#54a0ff" stroke-width="1.5" />
+            <path d="M 10,30 Q 17.5,20 25,30 T 40,30" fill="none" stroke="#54a0ff" stroke-width="0.8" opacity="0.4" />
+            <path d="M 10,20 Q 17.5,10 25,20 T 40,20" fill="none" stroke="#54a0ff" stroke-width="0.8" opacity="0.4" />
+          </svg>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="threat-details">
+          <div class="threat-lvl-header">${badgeText}</div>
+          <div class="threat-text-title">${h.title.toUpperCase()}</div>
+          <div class="threat-location-row">
+            <span class="threat-loc-name">${h.name.toUpperCase()} | ${h.region.toUpperCase()}</span>
+            <span class="threat-time">14:02 UTC</span>
+          </div>
+        </div>
+        <div class="card-graphics">
+          ${svgGraphic}
+        </div>
+      `;
+
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
+        const detailsBox = document.getElementById('point-details-box');
+        if (detailsBox) detailsBox.classList.remove('hidden');
+        playSound('sonar');
+        flyToLocation(h.lat, h.lng, h.name, h.region, h.type, h.title);
+      });
+
+      listContainer.appendChild(card);
+    });
+
+    setNewsScanStatus('GLOBAL DEFENSE NETWORK FEED', 'general');
   }
 
   // --- EVENT BINDINGS ---
@@ -1422,7 +1581,7 @@ import * as THREE from 'https://esm.sh/three';
       toggleSpin();
     });
 
-    // Locate button (fly to user coordinates using HTML Geolocation)
+    // Locate button
     document.getElementById('btn-locate').addEventListener('click', () => {
       playSound('click');
       if (navigator.geolocation) {
@@ -1431,15 +1590,20 @@ import * as THREE from 'https://esm.sh/three';
           (pos) => {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
+            const detailsBox = document.getElementById('point-details-box');
+            if (detailsBox) detailsBox.classList.remove('hidden');
             flyToLocation(lat, lng, 'My Geolocation Vector');
           },
           (err) => {
             console.warn("Geolocation access blocked", err);
-            // Fly to a default location (e.g. New Delhi, India)
+            const detailsBox = document.getElementById('point-details-box');
+            if (detailsBox) detailsBox.classList.remove('hidden');
             flyToLocation(28.6139, 77.2090, 'Default Position (New Delhi)');
           }
         );
       } else {
+        const detailsBox = document.getElementById('point-details-box');
+        if (detailsBox) detailsBox.classList.remove('hidden');
         flyToLocation(28.6139, 77.2090, 'Default Position (New Delhi)');
       }
     });
@@ -1455,13 +1619,62 @@ import * as THREE from 'https://esm.sh/three';
       toggleAudio();
     });
 
-    // Sidebar Close details panel
-    document.getElementById('close-details-btn').addEventListener('click', () => {
+    // Left Panel Toggle
+    document.getElementById('left-panel-toggle').addEventListener('click', () => {
       playSound('click');
-      document.getElementById('right-sidebar').classList.add('collapsed');
+      document.querySelector('.left-sidebar').classList.toggle('collapsed');
+    });
+
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      playSound('click');
+      document.querySelector('.left-sidebar').classList.toggle('collapsed');
+    });
+
+    // Right Panel Toggle
+    document.getElementById('right-panel-toggle').addEventListener('click', () => {
+      playSound('click');
+      const rightSidebar = document.getElementById('right-sidebar');
+      rightSidebar.classList.toggle('collapsed');
+      if (rightSidebar.classList.contains('collapsed')) {
+        removeCustomClickMarker();
+        updateGlobeLayers();
+        toggleSpin(true);
+      }
+    });
+
+    // Header buttons
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      playSound('click');
+      // Reset view to global threat feed
+      const detailsBox = document.getElementById('point-details-box');
+      if (detailsBox) detailsBox.classList.add('hidden');
       removeCustomClickMarker();
-      updateGlobeLayers(); // Refresh hotspots elements
-      toggleSpin(true); // Resume auto spinning
+      updateGlobeLayers();
+      renderGlobalThreatFeed();
+      state.globe.pointOfView({ lat: 20, lng: 77, altitude: 2.2 }, 1200);
+      toggleSpin(true);
+    });
+
+    document.getElementById('btn-header-settings').addEventListener('click', () => {
+      playSound('click');
+      const settingsAcc = document.getElementById('settings-accordion');
+      const settingsBody = document.getElementById('settings-acc-body');
+      const settingsHeader = document.getElementById('settings-acc-header');
+      settingsHeader.classList.toggle('active');
+      settingsBody.classList.toggle('collapsed');
+    });
+
+    // Collapsible Accordions in Left Sidebar
+    document.getElementById('filter-acc-header').addEventListener('click', () => {
+      playSound('click');
+      document.getElementById('filter-acc-header').classList.toggle('active');
+      document.getElementById('filter-acc-body').classList.toggle('collapsed');
+    });
+
+    document.getElementById('settings-acc-header').addEventListener('click', () => {
+      playSound('click');
+      document.getElementById('settings-acc-header').classList.toggle('active');
+      document.getElementById('settings-acc-body').classList.toggle('collapsed');
     });
 
     // Geographic Scope Tab switching
@@ -1470,11 +1683,9 @@ import * as THREE from 'https://esm.sh/three';
         if (tab.classList.contains('active')) return;
         playSound('click');
 
-        // Toggle visual active tab
         document.querySelectorAll('.scope-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
 
-        // Set state and reload news query feed
         state.activeScope = tab.dataset.scope;
         if (state.selectedGeo.lat !== null) {
           fetchLocationNews();
@@ -1482,7 +1693,7 @@ import * as THREE from 'https://esm.sh/three';
       });
     });
 
-    // Search bar keystroke queries (with simple debounce)
+    // Search bar
     const searchInput = document.getElementById('search-input');
     const clearSearchBtn = document.getElementById('clear-search');
 
@@ -1508,45 +1719,46 @@ import * as THREE from 'https://esm.sh/three';
       document.getElementById('search-results').classList.add('hidden');
     });
 
-    // Hide search results if clicked outside
     document.addEventListener('click', (e) => {
       const results = document.getElementById('search-results');
-      const searchBox = document.querySelector('.search-section');
+      const searchBox = document.getElementById('filter-acc-body');
       if (results && !searchBox.contains(e.target)) {
         results.classList.add('hidden');
       }
     });
 
-    // Filter Buttons in Left Sidebar (Counters)
-    document.getElementById('stat-danger-btn').addEventListener('click', () => {
-      playSound('click');
-      setFilter('danger');
+    // Filter Options
+    document.querySelectorAll('.filter-opt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('.filter-opt-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        setFilter(btn.dataset.filter);
+      });
     });
-    document.getElementById('stat-warning-btn').addEventListener('click', () => {
-      playSound('click');
-      setFilter('warning');
+
+    // Left Sidebar Footer Toolbar Icons
+    document.querySelectorAll('.toolbar-icon-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('.toolbar-icon-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
     });
-    document.getElementById('stat-info-btn').addEventListener('click', () => {
-      playSound('click');
-      setFilter('general');
+
+    // World View Tabs Selector
+    document.querySelectorAll('.hud-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        playSound('click');
+        document.querySelectorAll('.hud-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
     });
   }
 
   // Set active left-sidebar hotspots list filter (Danger, Warning, General)
   function setFilter(type) {
-    if (state.currentFilter === type) {
-      state.currentFilter = 'all';
-      // Reset visual status classes of buttons
-      document.querySelectorAll('.stat-card').forEach(el => el.style.background = 'rgba(0,0,0,0.2)');
-    } else {
-      state.currentFilter = type;
-      // Highlight selected counter visually
-      document.querySelectorAll('.stat-card').forEach(el => el.style.background = 'rgba(0,0,0,0.2)');
-      const activeCard = document.getElementById(`stat-${type === 'general' ? 'info' : type}-btn`);
-      if (activeCard) {
-        activeCard.style.background = 'rgba(255, 255, 255, 0.05)';
-      }
-    }
+    state.currentFilter = type;
     updateGlobeLayers();
     populateHotspotsFeed();
   }
@@ -1554,8 +1766,22 @@ import * as THREE from 'https://esm.sh/three';
   // --- INITIALIZATION ---
   initStars();
   initGlobe();
+  
+  // Set alert count panel value dynamically
+  const alertsCountVal = document.getElementById('alerts-count-val');
+  if (alertsCountVal) {
+    alertsCountVal.textContent = state.hotspots.length;
+  }
+
   updateSidebarCounters();
   populateHotspotsFeed();
+  
+  // Pre-load right panel with global threat feed on launch
+  renderGlobalThreatFeed();
+  
+  // Remove default collapsed state so both panels load open
+  document.getElementById('right-sidebar').classList.remove('collapsed');
+
   setupEventListeners();
 
   // Load Lucide Icons tags

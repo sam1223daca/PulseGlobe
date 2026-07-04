@@ -32,25 +32,26 @@
 - **6-second timeout** with graceful mock fallback
 
 ### 🚨 Global Incident Monitor
-- **Pre-configured hotspots** with pulsing ring animations on the globe
-- **Live ticker bar** scrolling breaking alerts at the bottom
-- **Filter by threat level** — click Danger/Warning/General stat cards
-- **Hotspot click → news injection**: Clicking a hotspot forces its incident into the live feed
+- **Pre-configured hotspots** with pulsing concentric ring sweeps on the globe
+- **Collapsible sidebar panels** for maximum screen coverage
+- **Global wire alert ticker** at the bottom with continuous breaking incident marquee scrolling
+- **Default feed loading** — pre-populates right panel on start-up with global hotspots before any location is clicked
 
 ### 🎛️ HUD Controls
-- **Search bar** with autocomplete (cities, countries, coordinates)
-- **Spin On/Off** toggle for auto-rotation
-- **My Location** — fly to your GPS coordinates
-- **Night Map** toggle
-- **Audio controls** — ambient sounds, click/sonar effects
-- **Real-time UTC clock**
+- **Dual clock system** — real-time GMT/UTC clock and date formatted to standard military style (`GMT: HH:MM:SS` | `DATE: DD MMM YYYY`)
+- **System settings accordion** — auto-rotate, trace IP geolocation, toggle night map, mute sound
+- **Active filters accordion** — search database, filter threat categories
+- **Mini world map widget** — inline SVG vector overview of global continents featuring pulsing red alert dots
+- **World view tabs** — quickly toggle between 3D Globe, Heat Map, and Data Layers modes
+- **HUD footer toolbar** — console monitor, threat analytics, parameters, setup settings
+- **Reset button** — header logout action flies back to global view and resets feed
 
 ### 🎨 Design
-- **Glassmorphism panels** with backdrop blur
-- **Twinkling parallax starfield** background
-- **Nebula glow** ambient effects
-- **Smooth micro-animations** throughout
-- **Fully responsive** layout
+- **Military command center HUD theme** in neon cyan, red, and orange accents
+- **Glassmorphism translucent sidebars** with background blur overlays
+- **Cyberpunk threat cards** with custom inline SVGs (hazard triangles, network grids, energy waveforms) matching threat levels
+- **Twinkling parallax starfield** and animated space background
+- **Responsive design** adapting layout for tablets and mobile devices
 
 ---
 
