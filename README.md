@@ -58,44 +58,65 @@
 
 ### Prerequisites
 - A modern web browser (Chrome, Firefox, Edge, Safari)
-- A local HTTP server (any of the options below)
+- A local HTTP server (multiple options provided below)
 
-### Run Locally
-
-**Option 1 — Python:**
+### Step 1 — Clone the Repository
 ```bash
-cd "live news"
+git clone https://github.com/sam1223daca/PulseGlobe.git
+cd PulseGlobe
+```
+
+### Step 2 — Start a Local Server
+
+> ⚠️ **Important:** You must run a local HTTP server. Opening `index.html` directly as a file will not work because the app loads ES modules and external textures that require HTTP.
+
+**Option 1 — Built-in PowerShell Server (Windows, no install needed):**
+```powershell
+powershell -ExecutionPolicy Bypass -File server.ps1
+```
+This auto-opens `http://localhost:8000` in your default browser.
+
+**Option 2 — Python (cross-platform):**
+```bash
 python -m http.server 8000
 ```
 
-**Option 2 — Node.js:**
+**Option 3 — Node.js (cross-platform):**
 ```bash
 npx -y http-server -p 8000
 ```
 
-**Option 3 — VS Code:**
-Install the "Live Server" extension and click "Go Live"
+**Option 4 — VS Code Live Server:**
+Install the [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) extension → right-click `index.html` → "Open with Live Server"
 
-Then open **[http://localhost:8000](http://localhost:8000)** in your browser.
+### Step 3 — Open in Browser
+
+Navigate to **[http://localhost:8000](http://localhost:8000)** and enjoy PulseGlobe! 🌍
+
+> **Tip:** First load may take 5–10 seconds as the NASA HD Earth texture (5400×2700) downloads. Subsequent visits use browser cache.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-live news/
+PulseGlobe/
 ├── index.html      # Main HTML structure & layout
 ├── styles.css      # Complete CSS design system (1300+ lines)
-├── app.js          # Full application logic (1300+ lines)
+├── app.js          # Full application logic (1500+ lines)
+├── server.ps1      # Built-in PowerShell HTTP server (Windows)
 ├── preview.jpg     # Project preview image
-└── README.md       # This file
+├── README.md       # This file
+└── .git/           # Git version control
 ```
 
 | File | Size | Description |
 |------|------|-------------|
 | `index.html` | ~8 KB | Semantic HTML5 with HUD layout, sidebars, globe container, audio elements |
 | `styles.css` | ~29 KB | Glassmorphism design system, animations, responsive breakpoints, geo-label styles |
-| `app.js` | ~70 KB | Globe initialization, label engine, news fetcher, geocoder, hotspot system, audio, search |
+| `app.js` | ~70 KB | Globe init, 350+ labels, news fetcher, geocoder, hotspot system, search, audio |
+| `server.ps1` | ~1 KB | Zero-dependency PowerShell HTTP server for Windows |
+
 
 ---
 
