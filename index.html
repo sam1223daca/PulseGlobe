@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseGlobe - Live 3D Earth News & Incident Tracker</title>
+  <!-- Google Fonts: Outfit (modern tech) & Inter (clean UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Vanilla CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  <!-- Load Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Twinkling Starfield Background Layer -->
+  <div id="space-background">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>
+    <div class="nebula-glow"></div>
+  </div>
+
+  <div id="app">
+    <!-- Top HUD Header -->
+    <header class="hud-header glass-card">
+      <div class="hud-logo-section">
+        <i data-lucide="globe-2" class="hud-icon logo-pulse"></i>
+        <div>
+          <h1>PULSE<span class="highlight">GLOBE</span></h1>
+          <p class="subtitle">Live 3D Incident & News Monitor</p>
+        </div>
+      </div>
+      <div class="hud-system-status">
+        <div class="status-indicator">
+          <span class="status-dot pulsing-green"></span>
+          <span class="status-text">SYSTEM ONLINE</span>
+        </div>
+        <div class="system-time" id="system-time">00:00:00 UTC</div>
+      </div>
+    </header>
+
+    <!-- 3D Globe Render Container -->
+    <main id="globe-container">
+      <div id="globeViz"></div>
+    </main>
+
+    <!-- Left Controls and Overview Sidebar -->
+    <aside class="left-sidebar sidebar glass-card">
+      <!-- Search Panel -->
+      <section class="search-section">
+        <div class="search-input-wrapper">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="search-input" placeholder="Search city, state or country..." autocomplete="off">
+          <button id="clear-search" class="btn-icon hidden">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div id="search-results" class="search-results-panel hidden"></div>
+      </section>
+
+      <!-- Global Threat Stats Indicator -->
+      <section class="stats-section">
+        <h3>GLOBAL SCANNER SUMMARY</h3>
+        <div class="stats-grid">
+          <div class="stat-card danger" id="stat-danger-btn">
+            <span class="stat-num" id="stat-danger">0</span>
+            <span class="stat-label"><i data-lucide="shield-alert"></i> DANGER</span>
+          </div>
+          <div class="stat-card warning" id="stat-warning-btn">
+            <span class="stat-num" id="stat-warning">0</span>
+            <span class="stat-label"><i data-lucide="alert-triangle"></i> WARNING</span>
+          </div>
+          <div class="stat-card general" id="stat-info-btn">
+            <span class="stat-num" id="stat-info">0</span>
+            <span class="stat-label"><i data-lucide="info"></i> GENERAL</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Broadcast Feeds Feed list -->
+      <section class="alerts-feed-section flex-grow">
+        <h3>ACTIVE HOTSPOTS FEED</h3>
+        <div class="alerts-feed-container" id="alerts-feed">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Map & View HUD controls -->
+      <section class="view-controls-section">
+        <h3>GLOBE CONTROL PANEL</h3>
+        <div class="controls-grid">
+          <button id="btn-spin" class="control-btn active" title="Toggle Globe Spin">
+            <i data-lucide="refresh-cw"></i> Spin On
+          </button>
+          <button id="btn-locate" class="control-btn" title="Fly to My Location">
+            <i data-lucide="navigation"></i> My Loc
+          </button>
+          <button id="btn-theme" class="control-btn" title="Toggle Earth Style">
+            <i data-lucide="layers"></i> Night Map
+          </button>
+          <button id="btn-audio" class="control-btn" title="Toggle HUD Sound">
+            <i data-lucide="volume-x"></i> Audio Off
+          </button>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Right Live News & GeoDetails Sidebar -->
+    <aside class="right-sidebar sidebar glass-card collapsed" id="right-sidebar">
+      <button class="sidebar-close-btn" id="close-details-btn">
+        <i data-lucide="chevron-right"></i>
+      </button>
+
+      <div class="details-panel-content">
+        <!-- Selected Location Header -->
+        <header class="location-header">
+          <div class="location-flag-badge" id="location-flag">📍</div>
+          <div class="location-titles">
+            <h2 id="location-name">Select a point</h2>
+            <p id="location-region">Click anywhere on the globe to scan</p>
+          </div>
+        </header>
+
+        <!-- Coordinate HUD display -->
+        <div class="coordinate-badge-row">
+          <div class="coordinate-badge">
+            <span class="coord-lbl">LAT:</span>
+            <span id="coord-lat">--.----</span>
+          </div>
+          <div class="coordinate-badge">
+            <span class="coord-lbl">LNG:</span>
+            <span id="coord-lng">--.----</span>
+          </div>
+        </div>
+
+        <!-- Geographic Scope Navigation Tabs -->
+        <nav class="scope-tabs-nav">
+          <button class="scope-tab active" data-scope="local">
+            <i data-lucide="map-pin"></i> Local Area
+          </button>
+          <button class="scope-tab" data-scope="state">
+            <i data-lucide="map"></i> State/Province
+          </button>
+          <button class="scope-tab" data-scope="country">
+            <i data-lucide="globe"></i> Country
+          </button>
+        </nav>
+
+        <!-- Dynamic Live News Area -->
+        <section class="news-list-section">
+          <div class="section-title-row">
+            <h3>LIVE NEWS FEED</h3>
+            <span class="scan-status" id="news-scan-status">AWAITING CORRELATION</span>
+          </div>
+
+          <!-- News Loading state -->
+          <div id="news-loader" class="news-loader hidden">
+            <div class="spinner"></div>
+            <p>Correlating satellite news telemetry...</p>
+          </div>
+
+          <!-- News feed list -->
+          <div class="news-list-container" id="news-list">
+            <div class="empty-news-state">
+              <i data-lucide="radio" class="empty-icon animate-pulse"></i>
+              <p>Click on an active pulsing hotspot or select any coordinate on the globe to execute a deep local news scan.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <!-- Bottom Incident Ticker Marquee -->
+    <footer class="bottom-ticker-bar glass-card">
+      <div class="ticker-label"><i data-lucide="broadcast"></i> WIRE ALERTS</div>
+      <div class="ticker-content">
+        <div class="ticker-scroll" id="ticker-scroll">
+          <span>CONNECTING TO WORLD NEWS HUBS...</span>
+          <span>SPIN GLOBE TO SCAN ACTIVE CHANNELS...</span>
+          <span>PULSEGLOBE HUD VERSION 1.1 ONLINE...</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Audio Context Elements for HUD Ambient Sounds -->
+  <audio id="audio-click" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav" preload="auto"></audio>
+  <audio id="audio-sonar" src="https://assets.mixkit.co/active_storage/sfx/2544/2544-84.wav" preload="auto"></audio>
+  <audio id="audio-ambient" loop src="https://assets.mixkit.co/active_storage/sfx/2073/2073-84.wav" preload="auto"></audio>
+
+  <!-- Main JavaScript App module -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
