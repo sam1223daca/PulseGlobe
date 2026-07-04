@@ -1670,6 +1670,8 @@ import * as THREE from 'https://esm.sh/three';
       const settingsHeader = document.getElementById('settings-acc-header');
       settingsHeader.classList.toggle('active');
       settingsBody.classList.toggle('collapsed');
+      // Auto-expand left sidebar if it was collapsed
+      document.querySelector('.left-sidebar').classList.remove('collapsed');
     });
 
     // Collapsible Accordions in Left Sidebar
@@ -1745,13 +1747,49 @@ import * as THREE from 'https://esm.sh/three';
       });
     });
 
-    // Left Sidebar Footer Toolbar Icons
-    document.querySelectorAll('.toolbar-icon-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        playSound('click');
-        document.querySelectorAll('.toolbar-icon-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
+    // Left Sidebar Footer Toolbar Icons - map to specific HUD sections
+    document.getElementById('toolbar-monitor').addEventListener('click', () => {
+      playSound('click');
+      document.querySelectorAll('.toolbar-icon-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('toolbar-monitor').classList.add('active');
+      // Scroll sidebar content to top
+      const scrollContent = document.querySelector('.left-sidebar .sidebar-scrollable-content');
+      if (scrollContent) {
+        scrollContent.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      // Expand left sidebar if collapsed
+      document.querySelector('.left-sidebar').classList.remove('collapsed');
+    });
+
+    document.getElementById('toolbar-analytics').addEventListener('click', () => {
+      playSound('click');
+      document.querySelectorAll('.toolbar-icon-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('toolbar-analytics').classList.add('active');
+      // Toggle right sidebar visibility
+      const rightSidebar = document.getElementById('right-sidebar');
+      rightSidebar.classList.toggle('collapsed');
+    });
+
+    document.getElementById('toolbar-parameters').addEventListener('click', () => {
+      playSound('click');
+      document.querySelectorAll('.toolbar-icon-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('toolbar-parameters').classList.add('active');
+      // Toggle filters accordion
+      document.getElementById('filter-acc-header').classList.toggle('active');
+      document.getElementById('filter-acc-body').classList.toggle('collapsed');
+      // Expand left sidebar if collapsed
+      document.querySelector('.left-sidebar').classList.remove('collapsed');
+    });
+
+    document.getElementById('toolbar-settings').addEventListener('click', () => {
+      playSound('click');
+      document.querySelectorAll('.toolbar-icon-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('toolbar-settings').classList.add('active');
+      // Toggle settings accordion
+      document.getElementById('settings-acc-header').classList.toggle('active');
+      document.getElementById('settings-acc-body').classList.toggle('collapsed');
+      // Expand left sidebar if collapsed
+      document.querySelector('.left-sidebar').classList.remove('collapsed');
     });
 
     // World View Tabs Selector
